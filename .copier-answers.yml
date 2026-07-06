@@ -1,0 +1,11 @@
+# 由 Copier 维护, 绝不手改 (seed update 会覆盖)。
+_commit: v0.6.0
+_src_path: https://github.com/the-orrery/seed
+author: eridani
+cli_command: pharos
+description: ''
+kind: cli
+package_name: pharos
+project_name: pharos
+publish: true
+python_min: '3.12'

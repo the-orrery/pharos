@@ -1,0 +1,89 @@
+[build-system]
+# uv_build: 纯 Python 甜区。命中 C/Rust 扩展 / build hook / VCS 动态版本 /
+# 隐式 namespace 包(无 __init__.py) 任一 → 换 hatchling。
+requires = ["uv_build>=0.11.21,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "pharos"
+version = "0.1.0"
+description = "Local workstation health checks with stateful alert tickets."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Eridanus" }]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "typer>=0.12",
+    "pydantic-settings>=2.0",
+    "structlog>=24.0",
+    "gnomon @ git+https://github.com/the-orrery/gnomon.git@1e949bcd22cdfd1f2459dbf43b7f6f03ab31d781",
+]
+
+[project.scripts]
+pharos = "pharos.cli:run"
+
+[dependency-groups]
+# ruff/pyrefly 不入此组: 走全局 uv tool 装一次, 让各仓 .venv 保持轻量。
+# 一次性: uv tool install ruff pyrefly
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-randomly",
+    "poethepoet",
+]
+# 可选: 出单文件 binary 到 dist/。
+freeze = ["pyinstaller>=6.0"]
+
+[tool.poe.tasks]
+lint = "uvx ruff@0.15.16 check ."
+fmt = "uvx ruff@0.15.16 format ."
+typecheck = "uv run --with pyrefly==1.0.0 pyrefly check"
+test = "pytest"
+check = { sequence = ["lint", "typecheck", "test"], help = "lint + typecheck + test" }
+freeze = { cmd = "pyinstaller --onefile --clean --name pharos src/pharos/cli.py", help = "build a single-file binary into dist/" }
+
+# Canonical ruff rules (select, per-file-ignores, flake8-bugbear) live in
+# the-orrery/.github/ruff.toml and are applied by the reusable CI workflow.
+# Only repo-specific overrides are declared here; they are passed to CI via
+# ruff-extend-ignore / ruff-extend-per-file-ignores workflow inputs.
+# For local lint: uvx ruff check --config <path-to-ruff.toml>
+#   --config "lint.extend-ignore=[...]"
+#   --config "lint.extend-per-file-ignores={...}" .
+[tool.ruff.lint]
+# TRY003: pharos raises CheckConfigError/ProbeError with inline messages —
+# single-exception CLI design (same pattern as docket), not a TRY003 smell.
+# TRY300: try/finally close patterns (socket.close / conn.close) make the
+# "move return to else" refactor structurally impossible — false positive.
+extend-ignore = ["TRY003", "TRY300"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+# PLR0913: reconciler upsert/touch are keyword-only internal APIs; many params
+# are each independent caller-tunable overrides, not a cohesive object.
+"src/pharos/alerts/store.py" = ["PLR0913"]
+# PLR0911: contrib type dispatch is a switch-style function; many returns expected.
+"src/pharos/checks/contrib.py" = ["PLR0911"]
+# PLR0913: check type __init__ methods have many params — each is a distinct
+# config field from TOML (id/source/url/timeout/etc.), not a cohesive object.
+# C901/PLR0912: check type run() branches reflect explicit check semantics,
+# not incidental complexity.
+"src/pharos/checks/types.py" = ["PLR0913", "C901", "PLR0912"]
+# C901: run_cmd orchestrates the full check pipeline in a single command;
+# the branches are each a distinct phase (load/route/reconcile/notify/aggregate).
+"src/pharos/cli.py" = ["C901"]
+# PLR0913: telemetry.run_instrumented mirrors gnomon's public API —
+# each kwarg is an independent caller-tunable override, not a cohesive object.
+"src/pharos/telemetry.py" = ["PLR0913"]
+# ARG: tests use fixtures for setup side-effects without consuming the value —
+# standard pytest idiom (e.g. `repo` fixture sets env vars).
+"tests/**" = ["ARG", "PLR0913"]
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

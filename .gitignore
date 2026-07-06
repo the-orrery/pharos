@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.pyrefly_cache/
+.codegraph/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+.repo-release-gate.local.toml
+.docket-release-gate.local.toml
+
+# secrets never belong in-repo (webhooks/tokens live in ~/.config)
+*.env

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 示例 launchd 任务:把 /opt/pharos 换成你的安装目录后,放到 ~/Library/LaunchAgents/。 -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.example.pharos</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/pharos/bin/pharos</string>
+    <string>run</string>
+    <string>--config</string>
+    <string>/opt/pharos/config/checks.toml</string>
+    <string>--route</string>
+    <string>/opt/pharos/config/channels.toml</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/pharos/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>300</integer>
+  <key>StandardOutPath</key>
+  <string>/opt/pharos/logs/pharos.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/opt/pharos/logs/pharos.err.log</string>
+</dict>
+</plist>

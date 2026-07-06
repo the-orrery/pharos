@@ -1,0 +1,60 @@
+# pharos sample check config — generic placeholders only.
+#
+# This file is PUBLIC documentation of the schema. Your real monitors (their
+# commands, paths, ports, URLs) are private CONFIG: keep them outside the repo
+# (e.g. ~/.config/pharos/checks.toml) and never commit secrets/hostnames.
+#
+# Each [[check]] table has: type (one of the eight check-types), id, source,
+# plus that type's params. Run with:  pharos run --config examples/checks.toml
+
+[[check]]
+type = "CommandJsonCheck"
+id = "doctor-ok"
+source = "example-service"
+command = ["echo", '{"ok": true}']
+success_field_path = "/ok"
+success_field_value = true
+runbook = "https://example.invalid/runbooks/doctor"
+
+[[check]]
+type = "HttpCheck"
+id = "api-healthz"
+source = "example-api"
+url = "http://127.0.0.1:8080/healthz"
+method = "GET"
+timeout = 5.0
+success_status_range = [200, 299]
+
+[[check]]
+type = "PidfileCheck"
+id = "worker-recording"
+source = "example-worker"
+pidfile_path = "/tmp/pharos-example/worker.pid"
+stale_after_secs = 600
+absent_is_ok = true
+
+[[check]]
+type = "FileContainsCheck"
+id = "hotkey-config"
+source = "example-config"
+path = "/tmp/pharos-example/app.conf"
+required_substrings = ["enabled = true", "mode = prod"]
+
+[[check]]
+type = "PortOwnerCheck"
+id = "db-port"
+source = "example-db"
+port = 5432
+expected_owner_substring = "postgres"
+
+[[check]]
+type = "JsonStatusFileCheck"
+id = "sync-runtime"
+source = "example-sync"
+status_file_path = "/tmp/pharos-example/sync-status.json"
+state_field = "/state"
+timestamp_field = "/updated_at_epoch"
+stale_threshold_secs = 3600
+ok_states = ["ok", "running"]
+degraded_states = ["skipped"]
+down_states = ["failed", "timeout"]
