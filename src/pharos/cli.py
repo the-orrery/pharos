@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 import typer
-
 from orrery_heartbeat import check_update
+
 from pharos import telemetry
 from pharos.logging_setup import setup_logging
 
