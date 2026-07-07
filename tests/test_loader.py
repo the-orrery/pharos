@@ -172,6 +172,28 @@ enabled = true
         assert checks[0].id == "on"
 
 
+class TestLocalOverlay:
+    def test_local_overlay_disables_check(self, tmp_path: Path) -> None:
+        _write(tmp_path, VALID)
+        local = tmp_path / "checks.local.toml"
+        local.write_text('[[check]]\nid = "api"\nenabled = false\n')
+        checks = load_checks(str(tmp_path / "checks.toml"))
+        assert len(checks) == 2
+        assert all(c.id != "api" for c in checks)
+
+    def test_local_overlay_overrides_field(self, tmp_path: Path) -> None:
+        _write(tmp_path, VALID)
+        local = tmp_path / "checks.local.toml"
+        local.write_text('[[check]]\nid = "db"\nexpected_owner_substring = "mysql"\n')
+        checks = load_checks(str(tmp_path / "checks.toml"))
+        po = [c for c in checks if c.id == "db"][0]
+        assert po.expected_owner_substring == "mysql"
+
+    def test_no_local_overlay_is_noop(self, tmp_path: Path) -> None:
+        checks = load_checks(_write(tmp_path, VALID))
+        assert len(checks) == 3
+
+
 class TestSampleConfig:
     def test_example_checks_toml_loads(self) -> None:
         # The shipped sample must always parse so the docs stay honest.
