@@ -334,13 +334,15 @@ def _load_local_overrides(config_path: Path) -> dict[str, dict]:
     if not isinstance(raw, list):
         raise CheckConfigError(f"{local}: top-level 'check' must be an array of tables")
     overrides: dict[str, dict] = {}
-    for entry in raw:
+    for idx, entry in enumerate(raw):
         if not isinstance(entry, dict):
-            continue
+            raise CheckConfigError(
+                f"{local}: override #{idx}: each [[check]] must be a table"
+            )
         cid = entry.get("id")
         if not cid:
             continue
-        overrides[cid] = {k: v for k, v in entry.items() if k != "id"}
+        overrides[cid] = {k: v for k, v in entry.items() if k not in ("id", "type")}
     return overrides
 
 
