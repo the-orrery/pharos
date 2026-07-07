@@ -313,14 +313,48 @@ def _expand_env(obj: Any) -> Any:
     return obj
 
 
+def _load_local_overrides(config_path: Path) -> dict[str, dict]:
+    """Load checks.local.toml sibling for machine-local check overrides.
+
+    Returns {check_id: {field: value}}.  The sibling is computed from
+    *config_path* WITHOUT resolving symlinks, so the local file lives next
+    to the symlink (e.g. ~/.config/pharos/) not inside the git repo.
+    """
+    local = config_path.with_name(config_path.stem + ".local" + config_path.suffix)
+    if not local.is_file():
+        return {}
+    try:
+        with local.open("rb") as fh:
+            doc = tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        raise CheckConfigError(
+            f"local override file is not valid TOML: {local}: {exc}"
+        ) from exc
+    raw = doc.get("check", [])
+    if not isinstance(raw, list):
+        raise CheckConfigError(f"{local}: top-level 'check' must be an array of tables")
+    overrides: dict[str, dict] = {}
+    for idx, entry in enumerate(raw):
+        if not isinstance(entry, dict):
+            raise CheckConfigError(
+                f"{local}: override #{idx}: each [[check]] must be a table"
+            )
+        cid = entry.get("id")
+        if not cid:
+            continue
+        overrides[cid] = {k: v for k, v in entry.items() if k not in ("id", "type")}
+    return overrides
+
+
 def load_checks(path: str) -> list[Check]:
     """Load and validate checks from the TOML file at *path*.
 
     Raises :class:`CheckConfigError` on a malformed file, a non-array
     ``check`` key, an unknown ``type``, or invalid/missing params.
     """
+    config_path = Path(path)
     try:
-        with Path(path).open("rb") as fh:
+        with config_path.open("rb") as fh:
             doc = tomllib.load(fh)
     except FileNotFoundError as exc:
         raise CheckConfigError(f"config file not found: {path}") from exc
@@ -331,10 +365,15 @@ def load_checks(path: str) -> list[Check]:
     if not isinstance(raw, list):
         raise CheckConfigError("top-level 'check' must be an array of tables")
 
+    local_overrides = _load_local_overrides(config_path)
+
     checks: list[Check] = []
     for idx, entry in enumerate(raw):
         if not isinstance(entry, dict):
             raise CheckConfigError(f"check #{idx}: each [[check]] must be a table")
+        cid = entry.get("id")
+        if cid and cid in local_overrides:
+            entry = {**entry, **local_overrides[cid]}
         if not entry.get("enabled", True):
             continue
         checks.append(_build_one(idx, _expand_env(entry)))
