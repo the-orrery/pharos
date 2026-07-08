@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   ci:
-    uses: the-orrery/.github/.github/workflows/python-ci.yml@77c7ac691d7da788412915d81ad5ac498187d179 # v8
+    uses: the-orrery/.github/.github/workflows/python-ci.yml@58e94252df4b455f1b6890ca5a8b400b3688ba81 # v9
     with:
       ruff-extend-ignore: "['TRY003','TRY300']"
       ruff-extend-per-file-ignores: "{'src/pharos/alerts/store.py'=['PLR0913'],'src/pharos/checks/contrib.py'=['PLR0911'],'src/pharos/checks/types.py'=['PLR0913','C901','PLR0912'],'src/pharos/cli.py'=['C901','PLR0912','PLR0915'],'src/pharos/telemetry.py'=['PLR0913'],'tests/**'=['ARG','PLR0913']}"
