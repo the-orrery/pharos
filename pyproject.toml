@@ -21,7 +21,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "structlog>=24.0",
     "gnomon @ git+https://github.com/the-orrery/gnomon.git@1e949bcd22cdfd1f2459dbf43b7f6f03ab31d781",
-    "orrery-heartbeat @ git+https://github.com/the-orrery/orrery-heartbeat.git",
+    "orrery-heartbeat @ git+https://github.com/the-orrery/orrery-heartbeat.git@3eb8b4c4d5855e8da9f59f4456adfc5b38d262e8",
 ]
 
 [project.scripts]
@@ -38,7 +38,7 @@ dev = [
     "poethepoet",
 ]
 # 可选: 出单文件 binary 到 dist/。
-freeze = ["pyinstaller>=6.0"]
+freeze = ["pyinstaller>=6,<7"]
 
 [tool.poe.tasks]
 lint = "uvx ruff@0.15.16 check ."
@@ -46,7 +46,7 @@ fmt = "uvx ruff@0.15.16 format ."
 typecheck = "uv run --with pyrefly==1.0.0 pyrefly check"
 test = "pytest"
 check = { sequence = ["lint", "typecheck", "test"], help = "lint + typecheck + test" }
-freeze = { cmd = "pyinstaller --onefile --clean --name pharos src/pharos/cli.py", help = "build a single-file binary into dist/" }
+freeze = { cmd = "./scripts/build-release.sh", help = "build the release binary" }
 
 # Canonical ruff rules (select, per-file-ignores, flake8-bugbear) live in
 # the-orrery/.github/ruff.toml and are applied by the reusable CI workflow.
