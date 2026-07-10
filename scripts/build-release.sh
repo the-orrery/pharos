@@ -4,8 +4,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="${1:-${ROOT}/dist/release}"
 BUILD_DIR="${PHAROS_BUILD_DIR:-${ROOT}/build/pyinstaller}"
 export PYINSTALLER_CONFIG_DIR="${PYINSTALLER_CONFIG_DIR:-${BUILD_DIR}/cache}"
-case "$(uname -s)" in Darwin) platform=darwin ;; Linux) platform=linux ;; *) exit 2 ;; esac
-case "$(uname -m)" in arm64|aarch64) arch=arm64 ;; x86_64|amd64) arch=x86_64 ;; *) exit 2 ;; esac
+case "$(uname -s)" in Darwin) platform=darwin ;; Linux) platform=linux ;; *) echo "Unsupported OS: $(uname -s)" >&2; exit 2 ;; esac
+case "$(uname -m)" in arm64|aarch64) arch=arm64 ;; x86_64|amd64) arch=x86_64 ;; *) echo "Unsupported architecture: $(uname -m)" >&2; exit 2 ;; esac
 mkdir -p "${OUTPUT_DIR}" "${BUILD_DIR}/dist" "${BUILD_DIR}/work" "${BUILD_DIR}/spec" "${PYINSTALLER_CONFIG_DIR}"
 uv run --group freeze pyinstaller --noconfirm --onefile --clean \
   --paths "${ROOT}/src" --collect-submodules pharos --collect-submodules gnomon \
