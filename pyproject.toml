@@ -6,7 +6,7 @@ build-backend = "uv_build"
 
 [project]
 name = "pharos"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local workstation health checks with stateful alert tickets."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -21,7 +21,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "structlog>=24.0",
     "gnomon @ git+https://github.com/the-orrery/gnomon.git@1e949bcd22cdfd1f2459dbf43b7f6f03ab31d781",
-    "orrery-heartbeat @ git+https://github.com/the-orrery/orrery-heartbeat.git@3eb8b4c4d5855e8da9f59f4456adfc5b38d262e8",
+    "orrery-heartbeat @ git+https://github.com/the-orrery/orrery-heartbeat.git@2eb9141389416e529aaa8ac7c7a744cae2efd3e8",
 ]
 
 [project.scripts]
