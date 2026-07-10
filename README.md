@@ -1,5 +1,13 @@
 # pharos
 
+## Install
+
+Install the verified `pharos-<os>-<arch>` asset from
+[GitHub Releases](https://github.com/the-orrery/pharos/releases). It does not
+need Python, `uv`, or a source checkout. Probe commands and notification targets
+remain explicit product dependencies. Targets are macOS arm64 and Linux x86_64
+(Ubuntu 22.04 baseline). Use `./scripts/build-release.sh` for a local build.
+
 本机基础设施健康监控:可插拔检查 → 有状态告警工单 → 多渠道通知。
 
 像灯塔一样守着一台机器的本地服务(SSH 隧道、本地 HTTP 服务、launchd 任务、unix socket、状态文件等)——坏了就开一张告警工单,并按来源发到对应通知渠道。
@@ -17,7 +25,7 @@
 
 ## 快速开始
 
-安装:`uv tool install` 本仓 → `pharos` 进 `PATH`(前置工具链见 [seed](https://github.com/the-orrery/seed))。
+先按上面的 Release asset 安装，让 `pharos` 进入 PATH。
 
 1. 写监控清单 `~/.config/pharos/checks.toml`(`examples/checks.toml` 是起手模板):
 
